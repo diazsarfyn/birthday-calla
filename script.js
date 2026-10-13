@@ -18,12 +18,12 @@ const FLOWERS = [
 
 // ✏️ 6 foto polaroid. Ganti src dengan foto kamu, mis. 'foto/1.jpg' (simpan di folder yang sama)
 const PHOTOS = [
-  { src: 'rumah.jpeg', cap: 'Pertama kali main ke rumah kamu' },
-  { src: 'jadian.jpeg', cap: 'Moment mau jadian wkwk' },
+  { src: 'rumah.jpeg', cap: 'Pertama ke Rumah' },
+  { src: 'jadian.jpeg', cap: 'Mau jadian wkwk' },
   { src: 'photobox.jpeg', cap: 'Photobox pertama kita' },
   { src: 'tahun.jpeg', cap: 'Happy New Year' },
   { src: 'bukber.jpeg', cap: 'First time kita bukber' },
-  { src: 'sma.jpeg', cap: 'Back to SMA hahaha' }
+  { src: 'sma.jpeg', cap: 'Back to School' }
 ];
 
 // ✏️ Timeline perjalanan cinta (boleh tambah/kurangi). d = tanggal, t = judul, x = cerita
