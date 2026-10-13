@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Happy Birthday Calla 💖</title><!-- judul tab diatur otomatis dari CONFIG.NAME di script.js -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="locked">
+
+<canvas id="confetti"></canvas>
+<div id="dim"></div>
+
+<!-- 1. LOCK SCREEN (PIN rahasia diatur di script.js → CONFIG.PIN) -->
+<section id="lock" class="screen">
+  <h2>Masukkan Password 🔒</h2>
+  <!-- ✏️ UBAH: petunjuk PIN supaya dia bisa menebak -->
+  <div id="dots"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div id="keypad"></div>
+</section>
+
+<!-- 2. KADO -->
+<section id="gift" class="screen hidden">
+  <p class="sub">Ada kado untukmu… ketuk ya 💝</p>
+  <div id="giftbox"><div class="lid"></div><div class="box"></div></div>
+</section>
+
+<main id="main" class="hidden">
+
+  <!-- 3. HERO (nama diatur di script.js → CONFIG.NAME) -->
+  <section class="hero">
+    <h1>Happy Birthday<br><span id="name"></span></h1>
+    <div class="cake">
+      <div id="flame"></div><div class="candle"></div>
+      <div class="tier t2"></div><div class="tier t1"></div>
+    </div>
+    <button id="blow">Tiup Lilin 🕯️</button>
+    <p id="wish"></p>
+  </section>
+
+  <!-- 4. SURAT CINTA -->
+  <section class="reveal">
+    <div class="letter">
+      <h2>Untukmu, Sayang 💌</h2>
+      <!-- ✏️ UBAH: tulis suratmu sendiri. Tambah/hapus tag <p> sesuka hati -->
+      <p>sayangg akuu gapernah nyangka bakal kenal seseorang sebaik, sesabar, setulus, dan sehebat kamuu, makasih yaa sayang udah lahir ke dunia ini, dan alhamdulillah juga kita ditakdirkan buat saling kenal, makasii yaa karena kamu, aku bisa ngerasain kasih sayang yang besarr dan ketulusan kamu yang sebelumnya belum pernah aku rasainn, meskipun perjalanan kita juga ga mudah banyak rintangannya tapii semoga kita selalu kuat bersama buat lewatin semuanya yaa sayangg, makasihhh banyakk kamuu selaluuuu ada untukk bertemu gapernah lelah buat selalu ketemu akuu, makasii juga ya sayangg udah jadi tempat ternyaman buat akuu. sekali lagi, happy birthday yaa sayanggkuu, haruss bahagia selalu sayangg, semua mimpi mimpi kamuu pasti akan tercapai, haruss selalu sayangg aku yaa, inget akuu jugaa kita lewatin senang dan sedihnya bareng bareng  dan semoga kita selalu lewatin banyak ulang tahun berikutnya barengg. akuu selalu sayangg kamu, love youuu callaaaaaaaaa 💗💖</p>
+      <p class="sign">Dengan sepenuh cinta,<br>Arfyn</p><!-- ✏️ UBAH: tanda tangan -->
+    </div>
+  </section>
+
+  <!-- 5. BUKET BUNGA (pesan tiap bunga di script.js → FLOWERS) -->
+  <section class="reveal">
+    <h2>Petik Bungamu 🌷</h2>
+    <p class="sub">Ketuk setiap kuncup</p>
+    <div id="bouquet"></div>
+    <p id="flowerMsg"></p>
+  </section>
+
+  <!-- 6. GALERI POLAROID (foto di script.js → PHOTOS) -->
+  <section class="reveal">
+  <h2>Galeri Kenangan 📷</h2>
+  <p class="sub">Ketuk untuk membuka</p>
+  <div id="gallery"></div>
+
+  <!-- 🔗 Tombol Link ke Memory Vending Machine -->
+  <div class="vending-link-wrap">
+    <a href="https://diazsarfyn.github.io/callpin-memory/" target="_blank" class="btn-vending">
+      🎁 Buka Memory Vending Machine ✨
+    </a>
+  </div>
+</section>
+
+  <!-- 7. TIMELINE (momen di script.js → MOMENTS) -->
+  <section>
+    <h2>Perjalanan Kita 💞</h2>
+    <div class="tl" id="timeline"></div>
+  </section>
+
+  <!-- 8. MUSIC PLAYER (lagu di script.js → SONGS) -->
+  <section class="reveal">
+    <h2>Lagu Untukmu 🎵</h2>
+    <div class="player">
+      <div class="disc"></div>
+      <p id="np"></p>
+      <div class="bar"><i id="bar"></i></div>
+      <div class="ctrl"><button id="play">▶ Play</button><button id="pause">⏸ Pause</button></div>
+      <ul id="plist"></ul>
+      <audio id="aud" preload="none"></audio>
+    </div>
+  </section>
+
+  <!-- 9. TOPLES PESAN (pesan di script.js → JAR) -->
+  <section class="reveal">
+    <h2>Toples Pesan</h2>
+    <div id="jar">
+    <img src="topes1.png" alt="Toples Pesan" class="jar-img">
+</div>
+    <button id="shake">Kocok Toples</button>
+    <p id="jarMsg"></p>
+  </section>
+
+  <!-- 10. FOOTER -->
+  <footer class="reveal">
+    <h2>Selamat ulang tahun, sayang 💗</h2>
+    <!-- ✏️ UBAH: pesan penutup -->
+    <p>Terima kasih sudah menjadi bagian paling indah dalam hidupku. Semoga tahun ini penuh dengan hal-hal yang membuatmu tersenyum.</p>
+    <p>Dibuat dengan cinta, untukmu. 🤍</p>
+  </footer>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
