@@ -61,6 +61,268 @@ const $ = s => document.querySelector(s);
 const make = (tag, cls, html) => { const e = document.createElement(tag); e.className = cls; e.innerHTML = html; return e; };
 const pop = (el, txt) => { el.textContent = txt; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); };
 
+/* --- Web Audio API (Sintesis Efek Suara / SFX) --- */
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) audioCtx = new AudioContextClass();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+// Auto-resume pada interaksi pertama (Desktop & Mobile)
+const unlockAudio = () => {
+  getAudioCtx();
+};
+['click', 'touchstart', 'touchend', 'keydown'].forEach(evt => {
+  window.addEventListener(evt, unlockAudio, { once: true, passive: true });
+});
+
+// 1. Keypad Lock Screen: Suara tap/click manis
+function sfxTap() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(650, t);
+  osc.frequency.exponentialRampToValueAtTime(320, t + 0.045);
+  gain.gain.setValueAtTime(0.18, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(t);
+  osc.stop(t + 0.05);
+}
+
+// 2. Password Salah: Suara buzz/error lembut saat getar
+function sfxError() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  [0, 0.12].forEach(delay => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(140, t + delay);
+    osc.frequency.linearRampToValueAtTime(100, t + delay + 0.1);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(400, t + delay);
+
+    gain.gain.setValueAtTime(0.15, t + delay);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.1);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(t + delay);
+    osc.stop(t + delay + 0.11);
+  });
+}
+
+// 3. Membuka Kado: Suara pop & sparkle berkilau
+function sfxGift() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+
+  // Pop
+  const popOsc = ctx.createOscillator();
+  const popGain = ctx.createGain();
+  popOsc.type = 'sine';
+  popOsc.frequency.setValueAtTime(800, t);
+  popOsc.frequency.exponentialRampToValueAtTime(180, t + 0.09);
+  popGain.gain.setValueAtTime(0.3, t);
+  popGain.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+  popOsc.connect(popGain);
+  popGain.connect(ctx.destination);
+  popOsc.start(t);
+  popOsc.stop(t + 0.1);
+
+  // Sparkle chime cascade
+  const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98, 2093.00];
+  notes.forEach((freq, idx) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const noteTime = t + 0.04 + idx * 0.055;
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, noteTime);
+
+    gain.gain.setValueAtTime(0.001, noteTime);
+    gain.gain.linearRampToValueAtTime(0.12, noteTime + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.001, noteTime + 0.4);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(noteTime);
+    osc.stop(noteTime + 0.45);
+  });
+}
+
+// 4. Meniup Lilin: Suara puff/whoosh lembut
+function sfxBlow() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const duration = 0.6;
+  const bufferSize = Math.floor(ctx.sampleRate * duration);
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1);
+  }
+
+  const noise = ctx.createBufferSource();
+  noise.buffer = buffer;
+
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.Q.setValueAtTime(1.2, t);
+  filter.frequency.setValueAtTime(900, t);
+  filter.frequency.exponentialRampToValueAtTime(220, t + duration);
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.001, t);
+  gain.gain.linearRampToValueAtTime(0.22, t + 0.1);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+
+  noise.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  noise.start(t);
+  noise.stop(t + duration);
+}
+
+// 5. Petik Bunga: Suara chime/pop lembut bernada merdu
+function sfxFlower(i = 0) {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const scale = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+  const baseFreq = scale[i % scale.length];
+
+  // Pop
+  const popOsc = ctx.createOscillator();
+  const popGain = ctx.createGain();
+  popOsc.type = 'sine';
+  popOsc.frequency.setValueAtTime(baseFreq * 0.8, t);
+  popOsc.frequency.exponentialRampToValueAtTime(baseFreq * 0.4, t + 0.05);
+  popGain.gain.setValueAtTime(0.12, t);
+  popGain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+  popOsc.connect(popGain);
+  popGain.connect(ctx.destination);
+  popOsc.start(t);
+  popOsc.stop(t + 0.06);
+
+  // Chime
+  const chimeOsc = ctx.createOscillator();
+  const chimeGain = ctx.createGain();
+  chimeOsc.type = 'triangle';
+  chimeOsc.frequency.setValueAtTime(baseFreq, t);
+  chimeGain.gain.setValueAtTime(0.001, t);
+  chimeGain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+  chimeGain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+  chimeOsc.connect(chimeGain);
+  chimeGain.connect(ctx.destination);
+  chimeOsc.start(t);
+  chimeOsc.stop(t + 0.48);
+
+  // Shimmer overtone
+  const harmOsc = ctx.createOscillator();
+  const harmGain = ctx.createGain();
+  harmOsc.type = 'sine';
+  harmOsc.frequency.setValueAtTime(baseFreq * 2, t);
+  harmGain.gain.setValueAtTime(0.001, t);
+  harmGain.gain.linearRampToValueAtTime(0.08, t + 0.02);
+  harmGain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+  harmOsc.connect(harmGain);
+  harmGain.connect(ctx.destination);
+  harmOsc.start(t);
+  harmOsc.stop(t + 0.38);
+}
+
+// 6. Membuka Polaroid: Suara snap/click kamera & kertas foto
+function sfxPolaroid() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  [0, 0.045].forEach((delay, idx) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = idx === 0 ? 'triangle' : 'sine';
+    const startFreq = idx === 0 ? 1200 : 1800;
+    osc.frequency.setValueAtTime(startFreq, t + delay);
+    osc.frequency.exponentialRampToValueAtTime(300, t + delay + 0.03);
+    const vol = idx === 0 ? 0.12 : 0.16;
+    gain.gain.setValueAtTime(vol, t + delay);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.035);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t + delay);
+    osc.stop(t + delay + 0.04);
+  });
+}
+
+// 7. Mengocok Toples: Suara shake/rattle kertas & toples
+function sfxShake() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const times = [0, 0.11, 0.22, 0.33];
+  times.forEach((offset, idx) => {
+    const clickTime = t + offset;
+    const dur = 0.06;
+    const bufferSize = Math.floor(ctx.sampleRate * dur);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1);
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(2200 + (idx % 2) * 500, clickTime);
+    filter.Q.setValueAtTime(3.0, clickTime);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.14, clickTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, clickTime + dur);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    noise.start(clickTime);
+    noise.stop(clickTime + dur);
+
+    const bead = ctx.createOscillator();
+    const beadGain = ctx.createGain();
+    bead.type = 'sine';
+    bead.frequency.setValueAtTime(700 + Math.random() * 300, clickTime);
+    beadGain.gain.setValueAtTime(0.04, clickTime);
+    beadGain.gain.exponentialRampToValueAtTime(0.001, clickTime + 0.05);
+    bead.connect(beadGain);
+    beadGain.connect(ctx.destination);
+    bead.start(clickTime);
+    bead.stop(clickTime + 0.06);
+  });
+}
+
 /* --- Konfeti & kelopak bunga (canvas) --- */
 const cv = $('#confetti'), cx = cv.getContext('2d'), COLORS = ['#ff7aa8', '#e0517f', '#ffd86b', '#fff0f3', '#c2185b'];
 let P = [];
@@ -103,11 +365,13 @@ const dots = $('#dots'), kp = $('#keypad');
 function paint() { [...dots.children].forEach((d, i) => d.classList.toggle('on', i < pin.length)); }
 function press(k) {
   if (busy) return;
+  sfxTap();
   if (k === '⌫') pin = pin.slice(0, -1); else if (pin.length < 6) pin += k;
   paint();
   if (pin.length < 6) return;
   busy = true;
   if (pin === CONFIG.PIN) return next($('#lock'), $('#gift'));
+  sfxError();
   dots.classList.add('shake');                       // PIN salah → getar
   setTimeout(() => { dots.classList.remove('shake'); pin = ''; paint(); busy = false; }, 600);
 }
@@ -118,6 +382,7 @@ addEventListener('keydown', e => {
 /* --- 2. Kado --- */
 $('#giftbox').onclick = function () {
   if (this.classList.contains('open')) return;
+  sfxGift();
   this.classList.add('open'); burst(160);
   setTimeout(() => next($('#gift'), $('#main'), () => { document.body.classList.remove('locked'); scrollTo(0, 0); }), 1800);
 };
@@ -127,6 +392,7 @@ $('#name').textContent = CONFIG.NAME;
 document.title = 'Happy Birthday ' + CONFIG.NAME + ' 💖';
 $('#blow').onclick = function () {
   this.disabled = true;
+  sfxBlow();
   $('.cake').classList.add('out');                   // api padam
   $('#dim').classList.add('on');                     // layar meredup
   setTimeout(() => { burst(180); pop($('#wish'), CONFIG.WISH); }, 900);
@@ -138,7 +404,10 @@ FLOWERS.forEach((m, i) => {
   const f = make('div', 'fl', '<span class="head"></span>');
   f.style.transform = `rotate(${(i - (FLOWERS.length - 1) / 2) * 9}deg)`;
   f.onclick = () => {
-    if (!f.classList.contains('open')) { const r = f.getBoundingClientRect(); burst(14, r.left + 23, r.top + 20); }
+    if (!f.classList.contains('open')) {
+      sfxFlower(i);
+      const r = f.getBoundingClientRect(); burst(14, r.left + 23, r.top + 20);
+    }
     f.classList.add('open'); pop($('#flowerMsg'), m);
   };
   $('#bouquet').append(f);
@@ -147,7 +416,10 @@ FLOWERS.forEach((m, i) => {
 /* --- 6. Galeri polaroid --- */
 PHOTOS.forEach(p => {
   const d = make('div', 'pol', `<div class="ph"><img src="${p.src}" alt="" loading="lazy"></div><p>${p.cap}</p>`);
-  d.onclick = () => d.classList.add('show');
+  d.onclick = () => {
+    if (!d.classList.contains('show')) sfxPolaroid();
+    d.classList.add('show');
+  };
   $('#gallery').append(d);
 });
 
@@ -183,6 +455,7 @@ load(0);
 /* --- 9. Toples pesan --- */
 let last = -1;
 $('#shake').onclick = () => {
+  sfxShake();
   const j = $('#jar'); j.classList.add('shake');
   setTimeout(() => {
     j.classList.remove('shake');
